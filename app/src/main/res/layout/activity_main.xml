@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#009999"
+    tools:context="com.example.bboss.btrockscissorpaper.MainActivity">
+
+    <ProgressBar
+        android:id="@+id/progressBar2"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="72dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/discovered"
+        app:layout_constraintStart_toEndOf="@+id/btnClient" />
+
+    <TextView
+        android:id="@+id/infotx"
+        android:layout_width="237dp"
+        android:layout_height="26dp"
+        android:layout_marginTop="8dp"
+        android:text="INFO HERE"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnServer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="80dp"
+        android:text="SERVER"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.994"
+        app:layout_constraintStart_toEndOf="@+id/btnClient"
+        app:layout_constraintTop_toBottomOf="@+id/infotx" />
+
+    <Button
+        android:id="@+id/btnClient"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="80dp"
+        android:text="CLIENT"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/infotx" />
+
+    <ListView
+        android:id="@+id/discovered"
+        android:layout_width="207dp"
+        android:layout_height="269dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:footerDividersEnabled="false"
+        android:headerDividersEnabled="false"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+    </ListView>
+
+    <TextView
+        android:id="@+id/discoveryInfo"
+        android:layout_width="199dp"
+        android:layout_height="22dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/discovered"
+        app:layout_constraintEnd_toEndOf="@+id/discovered"
+        app:layout_constraintStart_toStartOf="@+id/discovered" />
+
+</android.support.constraint.ConstraintLayout>
