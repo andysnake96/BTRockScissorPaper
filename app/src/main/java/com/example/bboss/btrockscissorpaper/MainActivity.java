@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             default:
                 throw new IllegalArgumentException("CLICK ONLY SERVER OR CLIENT BTN... :(");
 
-            }
+        }
         this.connectTry();
     }
     private void connectTry(){
@@ -160,15 +160,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // Discovery has found a device. Get the BluetoothDevice
                 // object and its info from the Intent.
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                //System.out.println(device.getName());
-                adapter.add(device.getName());
-                discovered.add(device);
-               // debugTargetDevice=device;
+                if(device.getName() != null) {
+                    System.out.println(device.getName());
+
+                    adapter.add(device.getName());
+                    discovered.add(device);
+                }
+                // debugTargetDevice=device;
                 //discovered.add(device);
                 //TODO ADD TO A LIST OF FOUNDED DEVICE (HAS TO BE CLEARED BEFORE START SCANNING!
                 //String deviceName = device.getName();
                 //String deviceHardwareAddress = device.getAddress(); // MAC address
-               // System.out.println(deviceName+deviceHardwareAddress);
+                // System.out.println(deviceName+deviceHardwareAddress);
             }
             if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
@@ -191,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
-        private void connectTryClient(){
+    private void connectTryClient(){
         //livio
         //TODO THIS METHOD HAS TO WRAP CALLING TO ANOTHER CLASS WITCH WILL PERFORM ALL IN ANOTHER THREAD
        /* BluetoothDevice targetDevice=null;
@@ -237,7 +240,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         doDiscovery();   //manualy handle bt discvoery in code!! async call
         //System.out.println(discovered);
         /* TODO LIVIO BIND DISCOVERED => LISTVIEW
-
         ArrayAdapter<BluetoothDevice> arrayAdapter= new ArrayAdapter<BluetoothDevice>(this,R.id.discovered,discovered);
         listViewDiscovered.setAdapter(arrayAdapter);
         Intent intentBluetooth = new Intent();
@@ -253,8 +255,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         /* TODO original   call 2 IO BT
         try {
-
-
             clientSocket= this.debugTargetDevice.createInsecureRfcommSocketToServiceRecord(uuid);
             clientSocket.connect(); //TODO BLOCKING UNTIL CLIENT AND SERVER HAVE PAIRED...
             //IOEXEPTION FOR TIMEOUT---ERRORS
@@ -263,20 +263,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL CLIENT");
             e.printStackTrace();
         }
-
-
         try {
             clientSocket.getInputStream().read();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         */
     }
 
     //al click prendo il dispositivo tramite il nome.
     private AdapterView.OnItemClickListener discoverListener
             = new AdapterView.OnItemClickListener() {
+
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             bluetoothAdapter.cancelDiscovery();
@@ -345,12 +343,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case (DURATION):{ //DOCS SAY RESULT OF BT DISCOVERABLE SWITCH USE THIS RET CODE...
                 //server calling
-                    if(resultCode==RESULT_CANCELED){
-                        BTHandler.setupAllert("ERROR IN DISCOVERABILITY");
-                    }
-                    else if (resultCode==RESULT_OK){
-                        System.out.println("OK DISCOVERABILITY SWITCH");
-                    }
+                if(resultCode==RESULT_CANCELED){
+                    BTHandler.setupAllert("ERROR IN DISCOVERABILITY");
+                }
+                else if (resultCode==RESULT_OK){
+                    System.out.println("OK DISCOVERABILITY SWITCH");
+                }
             }
         }
 
