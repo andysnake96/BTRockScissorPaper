@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view){
+        btnClient.setEnabled(false);
+        btnServer.setEnabled(false);
         switch (view.getId()){
             case R.id.btnClient:
                 hostKind=CLIENT;
@@ -185,7 +187,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     textDiscoveredInfo.append(" no device discovered");
 
                 }
-
+                btnClient.setEnabled(true);
+                btnServer.setEnabled(true);
 
             }
 
@@ -315,14 +318,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void doDiscovery() {
         // If we're already discovering, stop it
         textDiscoveredInfo.setVisibility(View.VISIBLE);
-        textDiscoveredInfo.setText("device discovered:");
+
         pb.setVisibility(View.VISIBLE);
         listViewDiscovered.setVisibility(View.VISIBLE);
-        if (bluetoothAdapter.isDiscovering()) {
+       /* if (bluetoothAdapter.isDiscovering()) {
             bluetoothAdapter.cancelDiscovery();
-        }
 
+        }
+        */
         // Request discover from BluetoothAdapter
+        textDiscoveredInfo.setText("device discovered:");
         bluetoothAdapter.startDiscovery();
     }
 
