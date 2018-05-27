@@ -18,6 +18,6 @@ public interface IOForRSPGame {
     =>switch state in game Activity (waiting->ready!)
     call receive (ONLY WHEN RECEIVED CALLING IN BROADCAST RECEIVER
      */
-    public String receiveMove(String s) throws Exception; // RETURN STRING MOVE ONLY IF READY TO READ ON SOCKET
+    public String receiveMove() throws Exception; // RETURN STRING MOVE ONLY IF READY TO READ ON SOCKET
     //TODO FOR CONSTRUCTOR NEEDED BT SOCKET
 }

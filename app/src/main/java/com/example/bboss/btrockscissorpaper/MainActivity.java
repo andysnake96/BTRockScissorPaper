@@ -123,34 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DURATION);
         startActivity(discoverableIntent);
-        //getting server socket
-        boolean debugOn=true;
-        if(!debugOn)
-            return;
-        BluetoothServerSocket bluetoothServerSocket= null;
-        BluetoothSocket serverSocket = null; //blocking call... MUST BE IN ANTOHER TH!
 
-        try {
-            bluetoothServerSocket = bluetoothAdapter.listenUsingRfcommWithServiceRecord(this.getLocalClassName(),uuid);
-            //SDP protocol where run bt? has localClassName and uuid specified
-            serverSocket = bluetoothServerSocket.accept();
-
-        } catch (IOException e) {
-            BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL (SERVER)");
-            e.printStackTrace();
-        }
-        try {
-            bluetoothServerSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //debug try write "hello fuck bt word"
-        try {
-            serverSocket.getOutputStream().write("hello fuck bt word".getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        //getted connection==>close way to get more ... //TODO CHANGE FOR >=3 PLAYER!
 
     }
     //BROADCAST RECEIVER 4 CLIENT
