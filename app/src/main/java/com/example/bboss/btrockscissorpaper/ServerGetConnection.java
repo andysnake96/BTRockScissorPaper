@@ -1,5 +1,6 @@
 package com.example.bboss.btrockscissorpaper;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
@@ -14,13 +15,13 @@ import java.io.IOException;
 
 public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
     BluetoothServerSocket bluetoothServerSocket;
+    MainActivity activityCalling;
 
 
-
-    public ServerGetConnection() {
+    public ServerGetConnection(MainActivity callActivity) {
         BluetoothAdapter bluetoothAdapter= BluetoothAdapter.getDefaultAdapter();   //singleton..=>ok
         bluetoothServerSocket= null;
-
+        activityCalling=callActivity;
 
 
         try {
@@ -64,5 +65,10 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
 
         }*/
     return serverSocket;
+    }
+
+    @Override
+    protected void onPostExecute(BluetoothSocket bluetoothSocket) {
+        this.activityCalling.takeSocket(bluetoothSocket);   //return to calling class with retrived socket
     }
 }

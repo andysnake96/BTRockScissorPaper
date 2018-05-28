@@ -42,6 +42,8 @@ TODO CANCELLA : TUTTE DIR BUILD...
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private TextView textViewInfos;
+    private TextView debugTv;
+    private Button debugSendBtn;
     private Button btnServer;
     private Button btnClient;
     private String hostKind;
@@ -55,9 +57,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final String SERVER="SERVER";
     private static final int REQUEST_ENABLE_BT=1;   //passed with intent to bt os handler...retrived in onREsult...
     private BluetoothAdapter bluetoothAdapter;
-
+    private BluetoothSocket bluetoothSocket;
     private final int DURATION=300;
     protected static final  UUID uuid= UUID.fromString("b8319a04-3632-4d0d-8bd5-47238a404a28");
+    private RSPSocket rspSocket;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnServer.setOnClickListener(this);
         btnClient.setOnClickListener(this);
         this.setUpBT();
+        //debug send & receive string on bt socket
+        debugSendBtn=findViewById(R.id.debugSendBtn);
+        debugTv=findViewById(R.id.debugBTSocket);
 
     }
     /*
@@ -123,12 +130,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void connectTry(){
 
         //start BT and switch in server host logic
-        if (hostKind.equals(SERVER))
+        if (hostKind.equals(SERVER)) {  //server
             connectTryServer();
-        else
-            connectTryClient();
-    }
 
+        }
+        else {
+            connectTryClient();
+        }
+    }
+    private void SampleMSGExcange(){
+        try {
+            this.rspSocket.sendMove("hello fucking BT word....");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void takeSocket(BluetoothSocket bluetoothSocket){
+        this.bluetoothSocket = bluetoothSocket;
+        if(this.bluetoothSocket==null){
+            BTHandler.setupAllert("SOMETHING HAS GONE WRONG...NULL SOCKET...");
+            return;   }
+
+        try {
+            this.rspSocket=new RSPSocket(this.bluetoothSocket,this); //debug msg exange
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
+        registerReceiver(mReceiver, filterMSGSocket);
+        //register receiver for readed msgs on socket
+
+        this.listViewDiscovered.setVisibility(View.INVISIBLE);
+        this.textDiscoveredInfo.setVisibility(View.INVISIBLE);
+        this.debugTv.setVisibility(View.VISIBLE);
+        this.debugSendBtn.setVisibility(View.VISIBLE);      //make visible debugs for socket
+        this.debugSendBtn.setOnClickListener(new View.OnClickListener() {   //listener for send string btn debug socket
+            @Override
+            public void onClick(View v) {
+                try {
+                    rspSocket.sendMove("hello fucking BT word....");
+                } catch (Exception e) {
+                    BTHandler.setupAllert("ERROR IN O");
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
     private void connectTryServer() {
         // andrea!
         Intent discoverableIntent =
@@ -139,15 +186,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
     private void getSocketServerSide(){
-        ServerGetConnection serverGetConnection=new ServerGetConnection();
+        ServerGetConnection serverGetConnection=new ServerGetConnection(this);
         BluetoothSocket serversSocket = null;
-        try {
-            serversSocket= serverGetConnection.execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        serverGetConnection.execute();
+
         System.out.println(serversSocket);
 
 
@@ -170,7 +212,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if(device.getName() != null) {
                     System.out.println(device.getName());
-
+                    if(discovered.contains(device))
+                        return;                         //TODO DEBUG NOT ADD TWICE... LATE MSG??
                     adapter.add(device.getName());
                     discovered.add(device);
                 }
@@ -196,6 +239,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btnClient.setEnabled(true);
                 btnServer.setEnabled(true);
 
+            }
+            if(action.equals(IOForRSPGame.READY_BT_MSG)){   //received msg from socket (reader service has sent
+                //broadcast msg... debug set text view...
+                try {
+                    String received=intent.getStringExtra("move");
+                    debugTv.setText(
+                            MainActivity.this.rspSocket.receiveMove()
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    BTHandler.setupAllert("ERROR IN RECEIVE!");
+                }
             }
 
         }
@@ -246,6 +301,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //listViewDiscovered.setVisibility(View.VISIBLE);
 
         adapter.clear();
+        int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
+
         doDiscovery();   //manualy handle bt discvoery in code!! async call
         //System.out.println(discovered);
         /* TODO LIVIO BIND DISCOVERED => LISTVIEW
@@ -296,9 +356,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
             System.out.println(targetDevice.getAddress() + "\n"+ targetDevice.getName());
-            ClientGetConnection clientGetConnection=new ClientGetConnection(targetDevice);
+            ClientGetConnection clientGetConnection=new ClientGetConnection(targetDevice,MainActivity.this);   //todo right this???
+            clientGetConnection.execute(targetDevice);  //todo later fix redundant input..
             BluetoothSocket clientSocket = null;
-            try {
+            /*try {
                 clientSocket =  clientGetConnection.execute(targetDevice).get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -306,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 e.printStackTrace();
             }
             System.out.print(clientSocket);
+            */
             /*try {
                 clientSocket=clientGetConnection.execute(targetDevice);
             } catch (InterruptedException e) {
@@ -367,9 +429,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 else if (resultCode==DURATION){
                     System.out.println("OK DISCOVERABILITY SWITCH");
-                    this.getSocketServerSide();
+                    //ok discoverability=> wait connections
+                    new ServerGetConnection(this).execute();    //will be callen with onPostExec takeSocket method
+
                 }
             }
+
         }
 
     }

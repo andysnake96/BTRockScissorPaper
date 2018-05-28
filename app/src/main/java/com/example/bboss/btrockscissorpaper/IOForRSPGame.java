@@ -11,13 +11,7 @@ public interface IOForRSPGame {
     //COSTANT STRING IN SEND&RECEIVE
     public static String READY_BT_MSG="READY_BT_MSG";
     public void sendMove(String s) throws Exception;
-    /*
-    SEND => write on socket async!
-    TODO IMPLEMENT BROADCASTRECEIVER with READY_BT_MSG req code
-    when ready msg on socket (from oth player)==> incoming msg on BroadCastReceiver
-    =>switch state in game Activity (waiting->ready!)
-    call receive (ONLY WHEN RECEIVED CALLING IN BROADCAST RECEIVER
-     */
+
     public String receiveMove() throws Exception; // RETURN STRING MOVE ONLY IF READY TO READ ON SOCKET
     //TODO FOR CONSTRUCTOR NEEDED BT SOCKET
 }

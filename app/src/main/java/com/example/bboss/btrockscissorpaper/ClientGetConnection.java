@@ -21,13 +21,14 @@ public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,Bluetoot
     TODO WRAP SOMETHING ELSE?
      */
     BluetoothSocket actualSocket ;
-
-    public ClientGetConnection(BluetoothDevice target){
+    MainActivity mainActivity;
+    public ClientGetConnection(BluetoothDevice target,MainActivity mainActivity){
         try {
             this.actualSocket=target.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.mainActivity=mainActivity;
     }
 
 
@@ -55,5 +56,9 @@ public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,Bluetoot
         return btsock;
     }
 
+    @Override
+    protected void onPostExecute(BluetoothSocket bluetoothSocket) {
+        mainActivity.takeSocket(bluetoothSocket);
 
+    }
 }
