@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BTRockScissorPaper.iml" filepath="$PROJECT_DIR$/BTRockScissorPaper.iml" />
-      <module fileurl="file://C:\Users\BBOSS\StudioProjects\RSP2\BTRockScissorPaper\BTRockScissorPaper.iml" filepath="C:\Users\BBOSS\StudioProjects\RSP2\BTRockScissorPaper\BTRockScissorPaper.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\BBOSS\StudioProjects\RSP2\BTRockScissorPaper\app\app.iml" filepath="C:\Users\BBOSS\StudioProjects\RSP2\BTRockScissorPaper\app\app.iml" />
     </modules>
   </component>
 </project>

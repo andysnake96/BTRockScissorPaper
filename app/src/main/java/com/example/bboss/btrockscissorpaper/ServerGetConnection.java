@@ -13,20 +13,37 @@ import java.io.IOException;
  */
 
 public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
-    @Override
-    protected BluetoothSocket doInBackground(Void... voids) {
+    BluetoothServerSocket bluetoothServerSocket;
 
+
+    @Override
+    protected void onPreExecute() {
         BluetoothAdapter bluetoothAdapter= BluetoothAdapter.getDefaultAdapter();   //singleton..=>ok
-        BluetoothServerSocket bluetoothServerSocket= null;
+        bluetoothServerSocket= null;
         BluetoothSocket serverSocket = null; //blocking call... MUST BE IN ANTOHER TH!
+
 
         try {
             bluetoothServerSocket = bluetoothAdapter.
-                    listenUsingRfcommWithServiceRecord(this.getClass().getName(),MainActivity.uuid);
-            //SDP protocol where run bt? has localClassName and uuid specified
-            serverSocket = bluetoothServerSocket.accept();
+                        listenUsingInsecureRfcommWithServiceRecord(this.getClass().getName(), MainActivity.uuid);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            BTHandler.setupAllert("ERROR IN SERVER SOCKET INIT");
+        }
 
-        } catch (IOException e) {
+
+    }
+
+    @Override
+    protected BluetoothSocket doInBackground(Void... voids) {
+
+        BluetoothSocket serverSocket=null;
+
+        //SDP protocol where run bt? has localClassName and uuid specified
+        try {
+            serverSocket = bluetoothServerSocket.accept();
+        }
+        catch (IOException e) {
             BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL (SERVER)");
             e.printStackTrace();
         }
@@ -38,14 +55,14 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
             e.printStackTrace();
 
         }
-        //debug try write "hello fuck bt word"
+       /* //debug try write "hello fuck bt word"
         try {
             serverSocket.getOutputStream().write("hello fuck bt word".getBytes());
         } catch (IOException e) {
             e.printStackTrace();
             BTHandler.setupAllert("ERROR IN WRITE INTO SOCKET");
 
-        }
+        }*/
     return serverSocket;
     }
 }

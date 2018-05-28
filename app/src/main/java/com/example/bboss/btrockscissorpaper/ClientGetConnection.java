@@ -14,20 +14,32 @@ import java.io.OutputStream;
  */
 /*
 API x gestione immagini vettoriali (drowable ..)
- */
+ */                                                 //TODO REMOVE?
 public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,BluetoothSocket> {
     /*
     th to get socket (android os will wrap pairing and estamblish rtf?? comunication channel between hosts
     TODO WRAP SOMETHING ELSE?
      */
+    BluetoothSocket actualSocket ;
+
+    public ClientGetConnection(BluetoothDevice target){
+        try {
+            this.actualSocket=target.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid)
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
+    protected void onPreExecute() {
+        actualSocket=
+    }
 
     private BluetoothSocket getSocket(BluetoothDevice targetDev) {
         //get socket from pairing with btdevice debugTargetDevice...
-        BluetoothSocket actualSocket = null;
 
         try {
 
-            actualSocket = targetDev.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid);
+            //actualSocket = targetDev.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid);
             actualSocket.connect(); //TODO BLOCKING UNTIL CLIENT AND SERVER HAVE PAIRED...
             //IOEXEPTION FOR TIMEOUT---ERRORS
         } catch (IOException e) {

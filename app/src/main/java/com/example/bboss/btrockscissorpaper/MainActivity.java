@@ -71,16 +71,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         listViewDiscovered.setOnItemClickListener(discoverListener);
         pb = findViewById(R.id.progressBar2);
         textDiscoveredInfo = findViewById(R.id.discoveryInfo);
-    }
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        btnServer.setOnClickListener(this);
+        btnClient.setOnClickListener(this);
+        this.setUpBT();
 
+    }
+    /*
     @Override
     protected void onStart() {
         super.onStart();
-        btnServer.setOnClickListener(this);
-        btnClient.setOnClickListener(this);
+        //this.setUpBT();
 
 
     }
+    */
+    /*@Override
+    protected void onResume(){
+        super.onResume();
+        this.setUpBT();
+    }*/
 
     @Override
     public void onClick(View view){
@@ -99,9 +109,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         this.connectTry();
     }
-    private void connectTry(){
+    private void setUpBT(){
         System.out.println("SELECTED..."+hostKind);
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if(bluetoothAdapter==null){
             BTHandler.setupAllert("BT NOT SUPPORTED FROM DEVICE");
             finish();
@@ -110,6 +119,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent,REQUEST_ENABLE_BT);
         }
+    }
+    private void connectTry(){
+
         //start BT and switch in server host logic
         if (hostKind.equals(SERVER))
             connectTryServer();
@@ -124,6 +136,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DURATION);
         startActivity(discoverableIntent);
 
+
+    }
+    private void getSocketServerSide(){
+        ServerGetConnection serverGetConnection=new ServerGetConnection();
+        BluetoothSocket serversSocket;
+        try {
+            serversSocket= serverGetConnection.execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            BTHandler.setupAllert("ERROR IN PAIRING SERVER SIDE");
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
     }
     //BROADCAST RECEIVER 4 CLIENT
@@ -259,9 +284,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for(BluetoothDevice bd: discovered) {
                 if(targetDeviceName.equals(bd.getName())) {
                     targetDevice = bd;
+                    break;
                 }
             }
             System.out.println(targetDevice.getAddress() + "\n"+ targetDevice.getName());
+            ClientGetConnection clientGetConnection=new ClientGetConnection();
+            BluetoothSocket clientSocket;
+            clientGetConnection.execute(targetDevice);
+
+            /*try {
+                clientSocket=clientGetConnection.execute(targetDevice);
+            } catch (InterruptedException e) {
+                BTHandler.setupAllert("ERROR IN PAIRING CLIENT SIDE");
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            */
         /*
             try {
                 takeSocket(targetDevice);
@@ -326,6 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 else if (resultCode==RESULT_OK){
                     System.out.println("OK DISCOVERABILITY SWITCH");
+                    this.getSocketServerSide();
                 }
             }
         }

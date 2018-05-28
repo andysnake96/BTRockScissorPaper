@@ -10,12 +10,14 @@
     <ProgressBar
         android:id="@+id/progressBar2"
         style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="72dp"
+        android:layout_width="70dp"
+        android:layout_height="53dp"
+        android:layout_marginBottom="44dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/discovered"
-        app:layout_constraintStart_toEndOf="@+id/btnClient" />
+        app:layout_constraintStart_toStartOf="@+id/btnClient"
+        app:layout_constraintTop_toBottomOf="@+id/btnClient"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/infotx"
@@ -34,11 +36,13 @@
 
     <Button
         android:id="@+id/btnServer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="187dp"
+        android:layout_height="158dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="80dp"
         android:text="SERVER"
+        app:layout_constraintBottom_toBottomOf="@+id/btnClient"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.994"
         app:layout_constraintStart_toEndOf="@+id/btnClient"
@@ -46,8 +50,8 @@
 
     <Button
         android:id="@+id/btnClient"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="174dp"
+        android:layout_height="164dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="80dp"
         android:text="CLIENT"
@@ -56,8 +60,8 @@
 
     <ListView
         android:id="@+id/discovered"
-        android:layout_width="207dp"
-        android:layout_height="269dp"
+        android:layout_width="371dp"
+        android:layout_height="129dp"
         android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:footerDividersEnabled="false"
