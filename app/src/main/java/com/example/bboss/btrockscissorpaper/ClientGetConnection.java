@@ -13,7 +13,7 @@ import java.io.OutputStream;
  * Created by BBOSS on 24/05/2018.
  */
 /*
-API x gestione immagini vettoriali (drowable ..)
+
  */                                                 //TODO REMOVE?
 public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,BluetoothSocket> {
     /*
@@ -24,15 +24,12 @@ public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,Bluetoot
 
     public ClientGetConnection(BluetoothDevice target){
         try {
-            this.actualSocket=target.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid)
+            this.actualSocket=target.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    @Override
-    protected void onPreExecute() {
-        actualSocket=
-    }
+
 
     private BluetoothSocket getSocket(BluetoothDevice targetDev) {
         //get socket from pairing with btdevice debugTargetDevice...

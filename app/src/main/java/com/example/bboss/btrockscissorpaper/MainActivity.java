@@ -134,21 +134,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Intent discoverableIntent =
                 new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DURATION);
-        startActivity(discoverableIntent);
+        startActivityForResult(discoverableIntent, DURATION);
 
 
     }
     private void getSocketServerSide(){
         ServerGetConnection serverGetConnection=new ServerGetConnection();
-        BluetoothSocket serversSocket;
+        BluetoothSocket serversSocket = null;
         try {
             serversSocket= serverGetConnection.execute().get();
         } catch (InterruptedException e) {
             e.printStackTrace();
-            BTHandler.setupAllert("ERROR IN PAIRING SERVER SIDE");
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+        System.out.println(serversSocket);
+
+
+        /*try {
+            serverGetConnection.execute();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            BTHandler.setupAllert("ERROR IN PAIRING SERVER SIDE");
+        }*/
 
     }
     //BROADCAST RECEIVER 4 CLIENT
@@ -288,10 +296,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
             System.out.println(targetDevice.getAddress() + "\n"+ targetDevice.getName());
-            ClientGetConnection clientGetConnection=new ClientGetConnection();
-            BluetoothSocket clientSocket;
-            clientGetConnection.execute(targetDevice);
-
+            ClientGetConnection clientGetConnection=new ClientGetConnection(targetDevice);
+            BluetoothSocket clientSocket = null;
+            try {
+                clientSocket =  clientGetConnection.execute(targetDevice).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            System.out.print(clientSocket);
             /*try {
                 clientSocket=clientGetConnection.execute(targetDevice);
             } catch (InterruptedException e) {
@@ -313,18 +327,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     };
 
-    private void takeSocket(BluetoothDevice targetDevice) throws ExecutionException, InterruptedException {
-        BluetoothSocket bs = null;
-        ClientGetConnection clientGetConnection = new ClientGetConnection();
-        try {
-            bs = clientGetConnection.execute(targetDevice).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        System.out.print(bs);
-    }
 
 
     private void doDiscovery() {
@@ -363,7 +365,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(resultCode==RESULT_CANCELED){
                     BTHandler.setupAllert("ERROR IN DISCOVERABILITY");
                 }
-                else if (resultCode==RESULT_OK){
+                else if (resultCode==DURATION){
                     System.out.println("OK DISCOVERABILITY SWITCH");
                     this.getSocketServerSide();
                 }

@@ -16,11 +16,11 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
     BluetoothServerSocket bluetoothServerSocket;
 
 
-    @Override
-    protected void onPreExecute() {
+
+    public ServerGetConnection() {
         BluetoothAdapter bluetoothAdapter= BluetoothAdapter.getDefaultAdapter();   //singleton..=>ok
         bluetoothServerSocket= null;
-        BluetoothSocket serverSocket = null; //blocking call... MUST BE IN ANTOHER TH!
+
 
 
         try {
@@ -47,14 +47,14 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
             BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL (SERVER)");
             e.printStackTrace();
         }
-        try {
+        /*try {
             bluetoothServerSocket.close();
             //getted connection==>close way to get more ... //TODO CHANGE FOR >=3 PLAYER!
 
         } catch (IOException e) {
             e.printStackTrace();
 
-        }
+        }*/
        /* //debug try write "hello fuck bt word"
         try {
             serverSocket.getOutputStream().write("hello fuck bt word".getBytes());
