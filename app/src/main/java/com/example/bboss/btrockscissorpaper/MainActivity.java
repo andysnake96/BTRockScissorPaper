@@ -156,11 +156,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
-        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
-        registerReceiver(mReceiver, filterMSGSocket);
-        //register receiver for readed msgs on socket
+//        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
+//        registerReceiver(mReceiver, filterMSGSocket);
+//        //register receiver for readed msgs on socket
 
-        this.listViewDiscovered.setVisibility(View.INVISIBLE);
+        /*this.listViewDiscovered.setVisibility(View.INVISIBLE);
         this.textDiscoveredInfo.setVisibility(View.INVISIBLE);
         this.debugTv.setVisibility(View.VISIBLE);
         this.debugSendBtn.setVisibility(View.VISIBLE);      //make visible debugs for socket
@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     e.printStackTrace();
                 }
             }
-        });
+        });*/
     }
     private void connectTryServer() {
         // andrea!
@@ -244,9 +244,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //broadcast msg... debug set text view...
                 try {
                     String received=intent.getStringExtra("move");
+                    System.out.println(received+"ON BROADCAST RECEIVER\n\n ");
                     debugTv.setText(
-                            MainActivity.this.rspSocket.receiveMove()
-                    );
+                            received);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     BTHandler.setupAllert("ERROR IN RECEIVE!");

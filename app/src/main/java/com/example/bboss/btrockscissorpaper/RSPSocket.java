@@ -19,7 +19,7 @@ import javax.crypto.Cipher;
  * Created by BBOSS on 27/05/2018.
  */
 
-public class RSPSocket extends Service implements IOForRSPGame  {
+public class RSPSocket implements IOForRSPGame  {
 
     BluetoothSocket bluetoothSocket ;
     InputStream inputStream;
@@ -46,16 +46,26 @@ public class RSPSocket extends Service implements IOForRSPGame  {
         TODO fix long string send on socket... other data sent...problem to handle
         send broadcast msg with code MSG_RECEV when read return >0
          */
+        int MAX_2READ=22;
         @Override
         public void run() {
             int readed=0;
             //now receive from socket
-            byte[] bytes = new byte[1000];
+            byte[] bytes = new byte[MAX_2READ];
+
             try {
                 while (true) {
                     readed= inputStream.read(bytes);
-                    System.out.println(new String(bytes));
+                    System.out.print(new String(bytes));
                     if(readed>0){
+                        int r=0;
+                        while(readed<MAX_2READ){
+                            r=inputStream.read(bytes,readed,MAX_2READ-readed);
+                            readed+=r;
+                            System.out.print("\r"+new String(bytes));
+
+                        }
+
                         Intent intent = new Intent(IOForRSPGame.READY_BT_MSG);
                         intent.putExtra("move",new String(bytes));
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -80,15 +90,12 @@ public class RSPSocket extends Service implements IOForRSPGame  {
     public void abort(){
         this.ioTh.interrupt();
     }
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;            //DUMMY SERVICE
-    }
+
 
     @Override
     public void sendMove(String s) throws Exception {
         //called
-        final String toWrite = s;
+        final String toWrite = s+"\0";
         String a= new String(
                 s.getBytes("UTF-8"));
 
