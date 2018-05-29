@@ -156,6 +156,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+            Intent intent = new Intent(getApplicationContext(), ActivityGame.class);
+            intent.putExtra("rspSocket", this.rspSocket);
+         startActivity(intent);
 //        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
 //        registerReceiver(mReceiver, filterMSGSocket);
 //        //register receiver for readed msgs on socket
@@ -240,19 +244,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 btnServer.setEnabled(true);
 
             }
-            if(action.equals(IOForRSPGame.READY_BT_MSG)){   //received msg from socket (reader service has sent
-                //broadcast msg... debug set text view...
-                try {
-                    String received=intent.getStringExtra("move");
-                    System.out.println(received+"ON BROADCAST RECEIVER\n\n ");
-                    debugTv.setText(
-                            received);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    BTHandler.setupAllert("ERROR IN RECEIVE!");
-                }
-            }
 
         }
     };

@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">BTRockScissorPaper</string>
+    <string name="resultOk">You Win</string>
+    <string name= "draw"> Draw</string>
+    <string name = "resultNotOk"> You Lose</string>
+    <string name="waitOpponent"> Wait your opponent></string>
 </resources>

@@ -7,10 +7,13 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.security.Security;
 
 import javax.crypto.Cipher;
@@ -19,7 +22,7 @@ import javax.crypto.Cipher;
  * Created by BBOSS on 27/05/2018.
  */
 
-public class RSPSocket implements IOForRSPGame  {
+public class RSPSocket implements IOForRSPGame, Serializable{
 
     BluetoothSocket bluetoothSocket ;
     InputStream inputStream;
@@ -27,7 +30,7 @@ public class RSPSocket implements IOForRSPGame  {
     Reader ioTh;
     Context context;
     private static String  bufferedMove;                //move received from socket...buffered returned to app with call receive
-    public RSPSocket(BluetoothSocket btSocket,Context context) throws IOException {
+    public RSPSocket(BluetoothSocket btSocket,Context context)  throws IOException {
         this.bluetoothSocket=btSocket;
         if(btSocket==null){
             System.err.println("NULL SOCKET PASSED ! ");
@@ -35,11 +38,17 @@ public class RSPSocket implements IOForRSPGame  {
         }
         this.inputStream=btSocket.getInputStream();
         this.outputStream=btSocket.getOutputStream();
-        this.ioTh=new Reader();
-        ioTh.start();                   //start reader service...
+
+
 
         this.context=context;
     }
+
+    public void read() {
+        this.ioTh=new Reader();
+        ioTh.start();
+    }
+
     private class Reader extends Thread  {
         /*
         implement reader service... always attemp read from socket
@@ -120,5 +129,6 @@ public class RSPSocket implements IOForRSPGame  {
     public String receiveMove() throws Exception {
         return this.bufferedMove;
     }
+
 
 }
