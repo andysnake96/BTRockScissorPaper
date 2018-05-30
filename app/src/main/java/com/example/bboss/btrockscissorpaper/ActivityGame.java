@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -30,30 +31,37 @@ import static java.lang.Thread.sleep;
 public class ActivityGame extends Activity implements  View.OnClickListener {
     private ImageButton scissor;
     private TextView result;
+    private TextView winTw;
+    private TextView drawTw;
+    private TextView loseTw;
     private ImageButton paper;
     private ImageView imagineMove;
     private ImageButton stone;
     private ProgressBar pb;
-    private TextView info;
+
     private RSPSocket rspSocket;
     private String myMove;
     private String opponentMove=null;
     private Button restart;
     private ImageButton imageButtonPressed;
-    private int win=0;
-    private int lose=0;
-    private int draw=0;
+    private Integer win=0;
+    private Integer lose=0;
+    private Integer draw=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_game);
         /*Bundle extras = getIntent().getExtras();
         if (extras != null) {
             rspSocket = (RSPSocket) extras.getParcelable("rspSocket");
         }*/
         rspSocket = MainActivity.rspSocket;
-        info = findViewById(R.id.infoText);
+
+        winTw= findViewById(R.id.win);
+        loseTw= findViewById(R.id.lose);
+        drawTw= findViewById(R.id.draw);
         imagineMove = findViewById(R.id.move);
         result = findViewById(R.id.result);
         pb = findViewById(R.id.waitOpponent);
@@ -63,7 +71,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         stone.setOnClickListener(this);
         paper.setOnClickListener(this);
         scissor.setOnClickListener(this);
-        info.setText("wait move");
+
         restart = findViewById(R.id.restart);
         restart.setEnabled(false);
         IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
@@ -88,17 +96,16 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
 
 
 
-
     @Override
     public void onClick(View v) {
         imageButtonPressed = (ImageButton)v;
-        imageButtonPressed.setBackgroundColor(android.R.color.holo_green_light);
-
+        imageButtonPressed.animate().rotation(22);
+        imageButtonPressed.setPadding(22,22,22,22);
         stone.setEnabled(false);
         paper.setEnabled(false);
         scissor.setEnabled(false);
         pb.setVisibility(View.VISIBLE);
-        info.setText(getString(R.id.waitOpponent));
+
         switch (v.getId()) {
             case R.id.scissor:
                 myMove = "scissor";
@@ -155,7 +162,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
             return;
         }
         pb.setVisibility(View.INVISIBLE);
-        info.setText("");
+
         //start with for padding inserted misteriusly from some devices
         if(opponentMove.startsWith("scissor"))
                 imagineMove.setImageDrawable(getDrawable(R.drawable.forbice));
@@ -182,6 +189,10 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
             result.setText(getString(R.string.resultNotOk));
             lose++;
         }
+        winTw.setText(win.toString());
+        loseTw.setText(lose.toString());
+        drawTw.setText(draw.toString());
+
         restart.setEnabled(true);
     }
 
