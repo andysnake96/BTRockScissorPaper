@@ -24,7 +24,6 @@ import javax.crypto.Cipher;
 
 public class RSPSocket implements IOForRSPGame, Parcelable{
 
-    protected static final String END_MSG ="$" ;
     BluetoothSocket bluetoothSocket ;
     InputStream inputStream;
     OutputStream outputStream;
@@ -66,38 +65,35 @@ public class RSPSocket implements IOForRSPGame, Parcelable{
         TODO fix long string send on socket... other data sent...problem to handle
         send broadcast msg with code MSG_RECEV when read return >0
          */
-        int MAX_2READ=22;
+        int MAX_2READ=7;
         @Override
         public void run() {
-            int readed=0;
+            int readed,r;
+            readed=r=0;
             //now receive from socket
             byte[] bytes = new byte[MAX_2READ];
 
             try {
-                while (true) {
-                    readed= inputStream.read(bytes);
-                    inputStream.available();
-                    String received=new String (bytes);
-                    System.out.print(received);
-                    if(readed>0){
-                        int r=0;
-                        //LEGGO FINO A TERMINATORE MESSAGGIO
-                        while(!received.endsWith(END_MSG)){
-                            r=inputStream.read(bytes,readed,MAX_2READ-readed);
-                            readed+=r;
-                            System.out.print("\r"+new String(bytes));
+                int c=0;
+                do {
 
-                        }
+                    while (inputStream.available() > 0) {
+                        r = inputStream.read(bytes, readed, MAX_2READ - readed);
+                        readed += r;
+                        System.out.println("in readeder..." + new String(bytes));
 
-                        Intent intent = new Intent(IOForRSPGame.READY_BT_MSG);
-                        intent.putExtra("move",new String(bytes));
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        RSPSocket.bufferedMove = new String(bytes);  //TODO ANONYMUS CLASS STATIC NOT NEEDED??
-
-                        context.sendBroadcast(intent);
                     }
-                    //Thread.currentThread().sleep(256);
-                }
+                }while(readed==0);  //retry read until something has been readed on socket
+                    Intent intent = new Intent(IOForRSPGame.READY_BT_MSG);
+                    intent.putExtra("move", new String(bytes));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    RSPSocket.bufferedMove = new String(bytes);  //TODO ANONYMUS CLASS STATIC NOT NEEDED??
+
+                    context.sendBroadcast(intent);
+
+
+                //Thread.currentThread().sleep(256);
+
             } catch (IOException e) {
                 e.printStackTrace();
                 BTHandler.setupAllert("ERROR IN WRITE");
@@ -107,8 +103,8 @@ public class RSPSocket implements IOForRSPGame, Parcelable{
             }*/
 
 
-        }
-    };
+        }};
+
 
     public void abort(){
         this.ioTh.interrupt();
@@ -118,7 +114,7 @@ public class RSPSocket implements IOForRSPGame, Parcelable{
     @Override
     public void sendMove(String s) throws Exception {
         //called
-        final String toWrite = s+"\0";
+        final String toWrite = s;
         String a= new String(
                 s.getBytes("UTF-8"));
 
@@ -126,13 +122,15 @@ public class RSPSocket implements IOForRSPGame, Parcelable{
 
             @Override
             public void run() {
+                int i=0;
+
                 try {
                     outputStream.write(toWrite.getBytes("UTF-8"));
-                    System.out.println("facvxdh");
                 } catch (IOException e) {
                     e.printStackTrace();
                     BTHandler.setupAllert("ERROR IN WRITE");
                 }
+                System.out.println(toWrite+"writed");
 
             }
         }.start();

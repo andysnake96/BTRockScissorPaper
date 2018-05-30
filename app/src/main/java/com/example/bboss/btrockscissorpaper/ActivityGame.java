@@ -1,5 +1,6 @@
 package com.example.bboss.btrockscissorpaper;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
@@ -27,7 +28,6 @@ import org.w3c.dom.Text;
 import static java.lang.Thread.sleep;
 
 public class ActivityGame extends Activity implements  View.OnClickListener {
-    private static final int FIX_LEN = 7 ;
     private ImageButton scissor;
     private TextView result;
     private ImageButton paper;
@@ -37,8 +37,12 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
     private TextView info;
     private RSPSocket rspSocket;
     private String myMove;
-    private String opponentMove;
+    private String opponentMove=null;
     private Button restart;
+    private ImageButton imageButtonPressed;
+    private int win=0;
+    private int lose=0;
+    private int draw=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         restart.setEnabled(false);
         IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
         registerReceiver(mReceiver, filterMSGSocket);
+
         restart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,6 +78,8 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
                 result.setText("");
                 myMove = null;
                 opponentMove= null;
+                imagineMove.setVisibility(View.INVISIBLE);
+                imageButtonPressed.clearColorFilter();
                 restart.setEnabled(false);
             }
         });
@@ -84,6 +91,9 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
 
     @Override
     public void onClick(View v) {
+        imageButtonPressed = (ImageButton)v;
+        imageButtonPressed.setBackgroundColor(android.R.color.holo_green_light);
+
         stone.setEnabled(false);
         paper.setEnabled(false);
         scissor.setEnabled(false);
@@ -106,7 +116,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
     private void sendMove(String myMove) {
 
         try {
-            rspSocket.sendMove(myMove+rspSocket.END_MSG);
+            rspSocket.sendMove(myMove);
             rspSocket.read();
         } catch (Exception e) {
             e.printStackTrace();
@@ -123,15 +133,13 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
             if (action.equals(IOForRSPGame.READY_BT_MSG)) {   //received msg from socket (reader service has sent
                 //broadcast msg... debug set text view...
                 try {
-                    opponentMove = intent.getStringExtra("move").replace(rspSocket.END_MSG,"");
+                    opponentMove = intent.getStringExtra("move");
 
                     System.out.println(opponentMove + "ON BROADCAST RECEIVER\n\n ");
-                    try {
-                        rspSocket.abort();
-                    }
-                    catch(Exception e) {}
-                    whoWin();
 
+
+                    whoWin();
+                    opponentMove=null;
                 } catch (Exception e) {
                     e.printStackTrace();
                     BTHandler.setupAllert("ERROR IN RECEIVE!");
@@ -140,30 +148,39 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         }
     };
 
+    @SuppressLint("ResourceType")
     private void whoWin() {
+        if(opponentMove==null){
+            System.err.println("error in receive move");
+            return;
+        }
         pb.setVisibility(View.INVISIBLE);
         info.setText("");
-        switch(opponentMove) {
-            case "scissor":
-                imagineMove.setImageDrawable(getDrawable(R.id.scissor));
-                break;
-            case "paper":
-                imagineMove.setImageDrawable(getDrawable(R.id.paper));
-                break;
-            case "stone":
-                imagineMove.setImageDrawable(getDrawable(R.id.stone));
-                break;
-        }
+        //start with for padding inserted misteriusly from some devices
+        if(opponentMove.startsWith("scissor"))
+                imagineMove.setImageDrawable(getDrawable(R.drawable.forbice));
+
+        else if(opponentMove.startsWith("paper"))
+                imagineMove.setImageDrawable(getDrawable(R.drawable.carta));
+
+        else if(opponentMove.startsWith("stone"))
+                imagineMove.setImageDrawable(getDrawable(R.drawable.sasso));
+
+        else
+            System.err.println("invalid string received");
         imagineMove.setVisibility(View.VISIBLE);
-        if(opponentMove.equals(myMove)) {
+        if(opponentMove.startsWith(myMove)) {
             result.setText(getString(R.string.draw));
+            draw++;
         }
-        else if((myMove.equals("stone") && opponentMove.equals("scissor")) || (myMove.equals("paper") &&
-                    opponentMove.equals("stone")) || (myMove.equals("scissor") && opponentMove.equals("paper"))) {
+        else if((myMove.startsWith("stone") && opponentMove.startsWith("scissor")) || (myMove.startsWith("paper") &&
+                    opponentMove.startsWith("stone")) || (myMove.startsWith("scissor") && opponentMove.startsWith("paper"))) {
             result.setText(getString(R.string.resultOk));
+            win++;
         }
         else {
             result.setText(getString(R.string.resultNotOk));
+            lose++;
         }
         restart.setEnabled(true);
     }
