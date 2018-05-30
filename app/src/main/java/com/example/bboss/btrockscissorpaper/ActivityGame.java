@@ -27,6 +27,7 @@ import org.w3c.dom.Text;
 import static java.lang.Thread.sleep;
 
 public class ActivityGame extends Activity implements  View.OnClickListener {
+    private static final int FIX_LEN = 7 ;
     private ImageButton scissor;
     private TextView result;
     private ImageButton paper;
@@ -43,10 +44,11 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        Bundle extras = getIntent().getExtras();
+        /*Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            rspSocket = (RSPSocket) extras.getSerializable("rspSocket");
-        }
+            rspSocket = (RSPSocket) extras.getParcelable("rspSocket");
+        }*/
+        rspSocket = MainActivity.rspSocket;
         info = findViewById(R.id.infoText);
         imagineMove = findViewById(R.id.move);
         result = findViewById(R.id.result);
@@ -60,6 +62,8 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         info.setText("wait move");
         restart = findViewById(R.id.restart);
         restart.setEnabled(false);
+        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
+        registerReceiver(mReceiver, filterMSGSocket);
         restart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,12 +79,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
 
     }
 
-    private void waitOpponentMove() {
-        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
-        registerReceiver(mReceiver, filterMSGSocket);
-        rspSocket.read();
 
-    }
 
 
     @Override
@@ -93,18 +92,22 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         switch (v.getId()) {
             case R.id.scissor:
                 myMove = "scissor";
+                break;
             case R.id.stone:
                 myMove = "stone";
+                break;
             case R.id.paper:
                 myMove = "paper";
+                break;
         }
         sendMove(myMove);
     }
 
     private void sendMove(String myMove) {
+
         try {
-            rspSocket.sendMove(myMove);
-            waitOpponentMove();
+            rspSocket.sendMove(myMove+rspSocket.END_MSG);
+            rspSocket.read();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,7 +123,8 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
             if (action.equals(IOForRSPGame.READY_BT_MSG)) {   //received msg from socket (reader service has sent
                 //broadcast msg... debug set text view...
                 try {
-                    opponentMove = intent.getStringExtra("move");
+                    opponentMove = intent.getStringExtra("move").replace(rspSocket.END_MSG,"");
+
                     System.out.println(opponentMove + "ON BROADCAST RECEIVER\n\n ");
                     try {
                         rspSocket.abort();

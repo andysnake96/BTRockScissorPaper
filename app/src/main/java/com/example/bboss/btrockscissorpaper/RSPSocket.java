@@ -22,8 +22,9 @@ import javax.crypto.Cipher;
  * Created by BBOSS on 27/05/2018.
  */
 
-public class RSPSocket implements IOForRSPGame, Serializable{
+public class RSPSocket implements IOForRSPGame, Parcelable{
 
+    protected static final String END_MSG ="$" ;
     BluetoothSocket bluetoothSocket ;
     InputStream inputStream;
     OutputStream outputStream;
@@ -49,6 +50,16 @@ public class RSPSocket implements IOForRSPGame, Serializable{
         ioTh.start();
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+    }
+
     private class Reader extends Thread  {
         /*
         implement reader service... always attemp read from socket
@@ -65,10 +76,13 @@ public class RSPSocket implements IOForRSPGame, Serializable{
             try {
                 while (true) {
                     readed= inputStream.read(bytes);
-                    System.out.print(new String(bytes));
+                    inputStream.available();
+                    String received=new String (bytes);
+                    System.out.print(received);
                     if(readed>0){
                         int r=0;
-                        while(readed<MAX_2READ){
+                        //LEGGO FINO A TERMINATORE MESSAGGIO
+                        while(!received.endsWith(END_MSG)){
                             r=inputStream.read(bytes,readed,MAX_2READ-readed);
                             readed+=r;
                             System.out.print("\r"+new String(bytes));
@@ -114,7 +128,7 @@ public class RSPSocket implements IOForRSPGame, Serializable{
             public void run() {
                 try {
                     outputStream.write(toWrite.getBytes("UTF-8"));
-
+                    System.out.println("facvxdh");
                 } catch (IOException e) {
                     e.printStackTrace();
                     BTHandler.setupAllert("ERROR IN WRITE");

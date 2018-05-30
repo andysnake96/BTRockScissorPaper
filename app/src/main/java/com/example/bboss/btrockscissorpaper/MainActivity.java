@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private BluetoothSocket bluetoothSocket;
     private final int DURATION=300;
     protected static final  UUID uuid= UUID.fromString("b8319a04-3632-4d0d-8bd5-47238a404a28");
-    private RSPSocket rspSocket;
+    protected static RSPSocket rspSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,9 +157,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
 
-            Intent intent = new Intent(getApplicationContext(), ActivityGame.class);
-            intent.putExtra("rspSocket", this.rspSocket);
-         startActivity(intent);
+            Intent intent = new Intent(this, ActivityGame.class);
+          //  intent.putExtra("rspSocket", this.rspSocket);
+
+             startActivity(intent);
 //        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
 //        registerReceiver(mReceiver, filterMSGSocket);
 //        //register receiver for readed msgs on socket
