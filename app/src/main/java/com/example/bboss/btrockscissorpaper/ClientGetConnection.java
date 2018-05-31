@@ -23,8 +23,12 @@ public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,Bluetoot
     BluetoothSocket actualSocket ;
     MainActivity mainActivity;
     public ClientGetConnection(BluetoothDevice target,MainActivity mainActivity){
+        System.out.println("target2connect"+target.getAddress());
         try {
-            this.actualSocket=target.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid);
+            if(IOForRSPGame.SECURE)
+                this.actualSocket=target.createRfcommSocketToServiceRecord(MainActivity.uuid);
+            else
+                this.actualSocket=target.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -34,7 +38,7 @@ public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,Bluetoot
 
     private BluetoothSocket getSocket(BluetoothDevice targetDev) {
         //get socket from pairing with btdevice debugTargetDevice...
-
+        System.out.println("\n\nBEFORE"+actualSocket.isConnected());
         try {
 
             //actualSocket = targetDev.createInsecureRfcommSocketToServiceRecord(MainActivity.uuid);
@@ -44,6 +48,8 @@ public class ClientGetConnection extends AsyncTask<BluetoothDevice,Void,Bluetoot
             BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL CLIENT");
             e.printStackTrace();
         }
+        System.out.println("\n\nAFTER"+actualSocket.isConnected());
+
         return actualSocket;
     }
 

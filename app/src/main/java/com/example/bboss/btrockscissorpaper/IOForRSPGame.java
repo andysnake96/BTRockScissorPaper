@@ -11,7 +11,7 @@ public interface IOForRSPGame {
     //COSTANT STRING IN SEND&RECEIVE
     public static String READY_BT_MSG="READY_BT_MSG";
     public void sendMove(String s) throws Exception;
-
+    public static boolean SECURE=true;
     public String receiveMove() throws Exception; // RETURN STRING MOVE ONLY IF READY TO READ ON SOCKET
     //TODO FOR CONSTRUCTOR NEEDED BT SOCKET
 }

@@ -86,6 +86,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         debugTv=findViewById(R.id.debugBTSocket);
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        System.out.println("resume called");
+    }
     /*
     @Override
     protected void onStart() {
@@ -148,13 +155,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
     public void takeSocket(BluetoothSocket bluetoothSocket){
+        System.out.println("SOCKET TAKED!");
         this.bluetoothSocket = bluetoothSocket;
+        this.btnServer.setEnabled(true);
+        this.btnClient.setEnabled(true);
         if(this.bluetoothSocket==null){
             BTHandler.setupAllert("SOMETHING HAS GONE WRONG...NULL SOCKET...");
             return;   }
 
         try {
-            this.rspSocket=new RSPSocket(this.bluetoothSocket,this); //debug msg exange
+            rspSocket=new RSPSocket(this.bluetoothSocket,this); //debug msg exange
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -244,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
                 btnClient.setEnabled(true);
-                btnServer.setEnabled(true);
+
 
             }
 
@@ -300,12 +310,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //listViewDiscovered.setVisibility(View.VISIBLE);
 
         adapter.clear();
+        discovered.clear();
         int MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION = 1;
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
 
         doDiscovery();   //manualy handle bt discvoery in code!! async call
+
         //System.out.println(discovered);
         /* TODO LIVIO BIND DISCOVERED => LISTVIEW
         ArrayAdapter<BluetoothDevice> arrayAdapter= new ArrayAdapter<BluetoothDevice>(this,R.id.discovered,discovered);

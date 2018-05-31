@@ -16,6 +16,7 @@ import java.io.IOException;
 public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
     BluetoothServerSocket bluetoothServerSocket;
     MainActivity activityCalling;
+    private int timeout=5500;
 
 
     public ServerGetConnection(MainActivity callActivity) {
@@ -25,7 +26,11 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
 
 
         try {
-            bluetoothServerSocket = bluetoothAdapter.
+            if(IOForRSPGame.SECURE)
+                bluetoothServerSocket = bluetoothAdapter.
+                        listenUsingRfcommWithServiceRecord(this.getClass().getName(), MainActivity.uuid);
+            else
+                bluetoothServerSocket = bluetoothAdapter.
                         listenUsingInsecureRfcommWithServiceRecord(this.getClass().getName(), MainActivity.uuid);
         } catch (IOException e1) {
             e1.printStackTrace();
@@ -39,23 +44,25 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
     protected BluetoothSocket doInBackground(Void... voids) {
 
         BluetoothSocket serverSocket=null;
-
         //SDP protocol where run bt? has localClassName and uuid specified
+            //retry to connect because different factor may give problem to bt connection
+            try {
+                serverSocket = bluetoothServerSocket.accept();
+            } catch (IOException e) {
+                e.printStackTrace();
+                BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL (SERVER)");
+                //will trow anther exeption
+
+            }
+
         try {
-            serverSocket = bluetoothServerSocket.accept();
-        }
-        catch (IOException e) {
-            BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL (SERVER)");
-            e.printStackTrace();
-        }
-        /*try {
             bluetoothServerSocket.close();
             //getted connection==>close way to get more ... //TODO CHANGE FOR >=3 PLAYER!
 
         } catch (IOException e) {
             e.printStackTrace();
-
-        }*/
+            BTHandler.setupAllert("error in close bt  server socket");
+        }
        /* //debug try write "hello fuck bt word"
         try {
             serverSocket.getOutputStream().write("hello fuck bt word".getBytes());

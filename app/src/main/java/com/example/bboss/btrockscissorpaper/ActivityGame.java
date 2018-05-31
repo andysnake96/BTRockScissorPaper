@@ -11,9 +11,11 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.ScaleAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -47,6 +49,8 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
     private Integer win=0;
     private Integer lose=0;
     private Integer draw=0;
+    final float fixedScale=1.5f;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,27 +84,35 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         restart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                stone.setEnabled(true);
-                paper.setEnabled(true);
-                scissor.setEnabled(true);
-                result.setText("");
-                myMove = null;
-                opponentMove= null;
-                imagineMove.setVisibility(View.INVISIBLE);
-                imageButtonPressed.clearColorFilter();
-                restart.setEnabled(false);
+                restartMetch();
             }
         });
 
     }
 
 
+    private void restartMetch(){
+        stone.setEnabled(true);
+        paper.setEnabled(true);
+        scissor.setEnabled(true);
+        result.setText("");
+        myMove = null;
+        opponentMove= null;
+        //reset setting button pressed
+        imagineMove.setVisibility(View.INVISIBLE);
+        imageButtonPressed.setAlpha(1f);
+        imageButtonPressed.setScaleX(1);
+        imageButtonPressed.setScaleY(1);
 
+        restart.setEnabled(false);
+    }
     @Override
     public void onClick(View v) {
         imageButtonPressed = (ImageButton)v;
-        imageButtonPressed.animate().rotation(22);
-        imageButtonPressed.setPadding(22,22,22,22);
+
+        imageButtonPressed.setScaleX(fixedScale);
+        imageButtonPressed.setScaleY(fixedScale);
+        imageButtonPressed.setAlpha(0.7f);
         stone.setEnabled(false);
         paper.setEnabled(false);
         scissor.setEnabled(false);
@@ -147,6 +159,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
 
                     whoWin();
                     opponentMove=null;
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     BTHandler.setupAllert("ERROR IN RECEIVE!");
@@ -194,9 +207,28 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         drawTw.setText(draw.toString());
 
         restart.setEnabled(true);
+        //after midle time will be reset the match screen
+
+        new CountDownTimer(4000, 5000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                System.out.println("tik4");
+            }
+
+            @Override
+            public void onFinish() {
+                System.out.println("tik4");
+                restartMetch();
+            }
+        }.start();
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        this.unregisterReceiver(mReceiver);
+        this.rspSocket.abort();
+    }
 }
 
 

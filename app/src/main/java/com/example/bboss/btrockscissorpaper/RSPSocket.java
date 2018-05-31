@@ -22,7 +22,7 @@ import javax.crypto.Cipher;
  * Created by BBOSS on 27/05/2018.
  */
 
-public class RSPSocket implements IOForRSPGame, Parcelable{
+public class RSPSocket implements IOForRSPGame{
 
     BluetoothSocket bluetoothSocket ;
     InputStream inputStream;
@@ -30,6 +30,7 @@ public class RSPSocket implements IOForRSPGame, Parcelable{
     Reader ioTh;
     Context context;
     private static String  bufferedMove;                //move received from socket...buffered returned to app with call receive
+
     public RSPSocket(BluetoothSocket btSocket,Context context)  throws IOException {
         this.bluetoothSocket=btSocket;
         if(btSocket==null){
@@ -49,15 +50,6 @@ public class RSPSocket implements IOForRSPGame, Parcelable{
         ioTh.start();
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
-    }
 
     private class Reader extends Thread  {
         /*
@@ -107,7 +99,22 @@ public class RSPSocket implements IOForRSPGame, Parcelable{
 
 
     public void abort(){
-        this.ioTh.interrupt();
+        //this.ioTh.interrupt();
+        try {
+
+            this.inputStream.close();
+            this.outputStream.close();
+            this.bluetoothSocket.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("error in close... now socket=");
+
+        }
+        finally {
+            this.bluetoothSocket=null;
+        }
+        System.out.println("succesful closed socket bt");
     }
 
 

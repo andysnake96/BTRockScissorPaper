@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#009999"
+    android:background="@android:color/holo_green_light"
     tools:context="com.example.bboss.btrockscissorpaper.MainActivity">
 
     <ProgressBar
@@ -21,10 +21,10 @@
 
     <TextView
         android:id="@+id/infotx"
-        android:layout_width="237dp"
-        android:layout_height="26dp"
+        android:layout_width="303dp"
+        android:layout_height="132dp"
         android:layout_marginTop="8dp"
-        android:text="INFO HERE"
+        android:text="join into a match selecting an avaible device or host a game "
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
         android:textColor="@android:color/white"
@@ -36,26 +36,26 @@
 
     <Button
         android:id="@+id/btnServer"
-        android:layout_width="182dp"
-        android:layout_height="162dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginBottom="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="80dp"
-        android:text="SERVER"
+        android:text="HOST"
         app:layout_constraintBottom_toBottomOf="@+id/btnClient"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/btnClient"
         app:layout_constraintTop_toBottomOf="@+id/infotx"
-        app:layout_constraintVertical_bias="0.914" />
+        app:layout_constraintVertical_bias="0.885" />
 
     <Button
         android:id="@+id/btnClient"
-        android:layout_width="174dp"
-        android:layout_height="164dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="CLIENT"
+        android:text="JOIN "
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/infotx" />
 
