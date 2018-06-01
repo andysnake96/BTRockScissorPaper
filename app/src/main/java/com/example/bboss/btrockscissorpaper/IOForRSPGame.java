@@ -5,13 +5,9 @@ package com.example.bboss.btrockscissorpaper;
  */
 
 public interface IOForRSPGame {
-    public static String PAPER="PAPER";
-    public static String ROCK="ROCK";
-    public static String SCISSOR="SCISSOR";
-    //COSTANT STRING IN SEND&RECEIVE
     public static String READY_BT_MSG="READY_BT_MSG";
-    public void sendMove(String s) throws Exception;
+    public static String CLOSED_SOCKET_MSG="CLOSED";
+    public void sendMove(String s) throws Exception;    //only write on socket..
+    // another th to read and async notification by broadcast receiver
     public static boolean SECURE=true;
-    public String receiveMove() throws Exception; // RETURN STRING MOVE ONLY IF READY TO READ ON SOCKET
-    //TODO FOR CONSTRUCTOR NEEDED BT SOCKET
-}
+ }

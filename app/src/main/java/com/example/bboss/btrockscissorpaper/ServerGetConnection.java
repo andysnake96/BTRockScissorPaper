@@ -1,8 +1,6 @@
 package com.example.bboss.btrockscissorpaper;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.os.AsyncTask;
@@ -34,7 +32,7 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
                         listenUsingInsecureRfcommWithServiceRecord(this.getClass().getName(), MainActivity.uuid);
         } catch (IOException e1) {
             e1.printStackTrace();
-            BTHandler.setupAllert("ERROR IN SERVER SOCKET INIT");
+            BTHandler.setupAllert("ERROR IN SERVER SOCKET INIT",MainActivity.activityM );
         }
 
 
@@ -50,7 +48,7 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
                 serverSocket = bluetoothServerSocket.accept();
             } catch (IOException e) {
                 e.printStackTrace();
-                BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL (SERVER)");
+                BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL (SERVER)",MainActivity.activityM );
                 //will trow anther exeption
 
             }
@@ -61,7 +59,7 @@ public class ServerGetConnection extends AsyncTask<Void,Void,BluetoothSocket> {
 
         } catch (IOException e) {
             e.printStackTrace();
-            BTHandler.setupAllert("error in close bt  server socket");
+            BTHandler.setupAllert("error in close bt  server socket",MainActivity.activityM );
         }
        /* //debug try write "hello fuck bt word"
         try {

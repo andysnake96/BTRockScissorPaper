@@ -2,31 +2,21 @@ package com.example.bboss.btrockscissorpaper;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.CountDownTimer;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
-import android.view.animation.ScaleAnimation;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.example.bboss.btrockscissorpaper.R;
-
-import org.w3c.dom.Text;
+import android.widget.Toast;
 
 import static java.lang.Thread.sleep;
 
@@ -38,6 +28,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
     private TextView loseTw;
     private ImageButton paper;
     private ImageView imagineMove;
+    private TextView opponentMoveTv;
     private ImageButton stone;
     private ProgressBar pb;
 
@@ -50,11 +41,12 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
     private Integer lose=0;
     private Integer draw=0;
     final float fixedScale=1.5f;
-
+    protected  static Activity contexG;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        contexG=this;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_game);
         /*Bundle extras = getIntent().getExtras();
@@ -62,7 +54,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
             rspSocket = (RSPSocket) extras.getParcelable("rspSocket");
         }*/
         rspSocket = MainActivity.rspSocket;
-
+        opponentMoveTv= findViewById(R.id.opponentInfo);
         winTw= findViewById(R.id.win);
         loseTw= findViewById(R.id.lose);
         drawTw= findViewById(R.id.draw);
@@ -80,7 +72,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         restart.setEnabled(false);
         IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
         registerReceiver(mReceiver, filterMSGSocket);
-
+        registerReceiver(mReceiver,new IntentFilter(BTHandler.actionErrorToast));  //for errors toast
         restart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,6 +92,7 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
         opponentMove= null;
         //reset setting button pressed
         imagineMove.setVisibility(View.INVISIBLE);
+        opponentMoveTv.setVisibility(View.INVISIBLE);
         imageButtonPressed.setAlpha(1f);
         imageButtonPressed.setScaleX(1);
         imageButtonPressed.setScaleY(1);
@@ -151,83 +144,106 @@ public class ActivityGame extends Activity implements  View.OnClickListener {
 
             if (action.equals(IOForRSPGame.READY_BT_MSG)) {   //received msg from socket (reader service has sent
                 //broadcast msg... debug set text view...
-                try {
+
                     opponentMove = intent.getStringExtra("move");
 
                     System.out.println(opponentMove + "ON BROADCAST RECEIVER\n\n ");
 
-
+                    if(opponentMove.equals(IOForRSPGame.CLOSED_SOCKET_MSG)){
+                        //socketClosed other side case=>close !
+                        finish();
+                    }
                     whoWin();
-                    opponentMove=null;
+                    opponentMove = null;
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    BTHandler.setupAllert("ERROR IN RECEIVE!");
-                }
+
+            } else if (action.equals(BTHandler.actionErrorToast)) {
+                String outputAllert = intent.getStringExtra(BTHandler.outputMSGKeyStr);
+                System.err.println("ALLERT" + outputAllert);
+                Toast toast = new Toast(ActivityGame.this).makeText(ActivityGame.this, outputAllert, 3);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+                final String error2Show = outputAllert;
+
+                new CountDownTimer(2000, 2000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        System.out.println("tik4");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        throw new RuntimeException("ALLERT..." + error2Show);
+                    }
+                }.start();
+
+
             }
+
         }
     };
 
-    @SuppressLint("ResourceType")
-    private void whoWin() {
-        if(opponentMove==null){
-            System.err.println("error in receive move");
-            return;
-        }
-        pb.setVisibility(View.INVISIBLE);
 
-        //start with for padding inserted misteriusly from some devices
-        if(opponentMove.startsWith("scissor"))
+         private void whoWin() {
+            if (opponentMove == null) {
+                System.err.println("error in receive move");
+                return;
+            }
+            pb.setVisibility(View.INVISIBLE);
+
+            //start with for padding inserted misteriusly from some devices
+            if (opponentMove.startsWith("scissor"))
                 imagineMove.setImageDrawable(getDrawable(R.drawable.forbice));
 
-        else if(opponentMove.startsWith("paper"))
+            else if (opponentMove.startsWith("paper"))
                 imagineMove.setImageDrawable(getDrawable(R.drawable.carta));
 
-        else if(opponentMove.startsWith("stone"))
+            else if (opponentMove.startsWith("stone"))
                 imagineMove.setImageDrawable(getDrawable(R.drawable.sasso));
 
-        else
-            System.err.println("invalid string received");
-        imagineMove.setVisibility(View.VISIBLE);
-        if(opponentMove.startsWith(myMove)) {
-            result.setText(getString(R.string.draw));
-            draw++;
-        }
-        else if((myMove.startsWith("stone") && opponentMove.startsWith("scissor")) || (myMove.startsWith("paper") &&
+            else
+                System.err.println("invalid string received");
+            opponentMoveTv.setVisibility(View.VISIBLE);
+            imagineMove.setVisibility(View.VISIBLE);
+            if (opponentMove.startsWith(myMove)) {
+                result.setText(getString(R.string.draw));
+                draw++;
+            } else if ((myMove.startsWith("stone") && opponentMove.startsWith("scissor")) || (myMove.startsWith("paper") &&
                     opponentMove.startsWith("stone")) || (myMove.startsWith("scissor") && opponentMove.startsWith("paper"))) {
-            result.setText(getString(R.string.resultOk));
-            win++;
-        }
-        else {
-            result.setText(getString(R.string.resultNotOk));
-            lose++;
-        }
-        winTw.setText(win.toString());
-        loseTw.setText(lose.toString());
-        drawTw.setText(draw.toString());
-
-        restart.setEnabled(true);
-        //after midle time will be reset the match screen
-
-        new CountDownTimer(4000, 5000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                System.out.println("tik4");
+                result.setText(getString(R.string.resultOk));
+                win++;
+            } else {
+                result.setText(getString(R.string.resultNotOk));
+                lose++;
             }
+            winTw.setText(win.toString());
+            loseTw.setText(lose.toString());
+            drawTw.setText(draw.toString());
 
-            @Override
-            public void onFinish() {
-                System.out.println("tik4");
-                restartMetch();
-            }
-        }.start();
-    }
+            restart.setEnabled(true);
+            //after midle time will be reset the match screen
+
+            new CountDownTimer(2300, 2300) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    System.out.println("tik4");
+                }
+
+                @Override
+                public void onFinish() {
+                    System.out.println("tik4");
+                    restartMetch();
+                }
+            }.start();
+        }
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         this.unregisterReceiver(mReceiver);
         this.rspSocket.abort();
+        System.out.println("ACTIVITY GAME FINISHED...");
     }
 }
 

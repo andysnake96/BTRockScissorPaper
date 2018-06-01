@@ -1,42 +1,40 @@
 package com.example.bboss.btrockscissorpaper;
 
-import android.app.Service;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
+import android.os.CountDownTimer;
+import android.view.Gravity;
+import android.widget.Toast;
 
 /**
  * Created by BBOSS on 22/05/2018.
  */
 
-public class BTHandler   {
+public class BTHandler {
     BluetoothAdapter bluetoothAdapter;
+    public static String actionErrorToast = "ERRORTOAST";
+    public static String outputMSGKeyStr = "errormsg";
 
+    public void findDevices() {
+    }
 
-    public void enableBT(){
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if(bluetoothAdapter==null){
-            setupAllert("BT NOT SUPPORTED FROM DEVICE");
-        }
+    ;
 
-    };
-    public void findDevices(){};
-    public void discovery(){};
-    public void connect(){};
-    public static void setupAllert(String outputAllert){  //TODO AGGIUSTAMI!
-        System.err.println("ALLERT"+outputAllert);
-        throw new RuntimeException("ALLERT..."+outputAllert);   //todo remove and update under
-        /*
-        AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Alert");
-        alertDialog.setMessage(outputAllert);
-        //alertDialog.setIcon(R.drawable.welcome);
+    public void discovery() {
+    }
 
-//        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-//            public void onClick(DialogInterface dialog, int which) {
-//                Toast.makeText(getApplicationContext(), "You clicked on OK", Toast.LENGTH_SHORT).show();
-//            }
-//        });
+    ;
 
-        alertDialog.show();
-        */
+    public void connect() {
+    }
+
+    ;
+
+    public static void setupAllert(String outputAllert, Activity activity) {
+        Intent sendError = new Intent(BTHandler.actionErrorToast);
+        sendError.putExtra(outputMSGKeyStr, outputAllert);
+        activity.sendBroadcast(sendError);
+
     }
 }

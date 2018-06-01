@@ -2,45 +2,34 @@ package com.example.bboss.btrockscissorpaper;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
-import android.renderscript.ScriptGroup;
+import android.os.CountDownTimer;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-/*
-TODO CANCELLA : TUTTE DIR BUILD...
- */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private TextView textViewInfos;
     private TextView debugTv;
@@ -62,10 +51,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int DURATION=300;
     protected static final  UUID uuid= UUID.fromString("b8319a04-3632-4d0d-8bd5-47238a404a28");
     protected static RSPSocket rspSocket;
+    protected static Activity activityM ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //activityM=this;
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
         btnClient = findViewById(R.id.btnClient);
@@ -84,30 +75,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //debug send & receive string on bt socket
         debugSendBtn=findViewById(R.id.debugSendBtn);
         debugTv=findViewById(R.id.debugBTSocket);
+        registerReceiver(mReceiver,new IntentFilter(BTHandler.actionErrorToast));  //for errors toast
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         System.out.println("resume called");
     }
-    /*
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //this.setUpBT();
-
-
-    }
-    */
-    /*@Override
-    protected void onResume(){
-        super.onResume();
-        this.setUpBT();
-    }*/
-
     @Override
     public void onClick(View view){
         btnClient.setEnabled(false);
@@ -128,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setUpBT(){
         System.out.println("SELECTED..."+hostKind);
         if(bluetoothAdapter==null){
-            BTHandler.setupAllert("BT NOT SUPPORTED FROM DEVICE");
+            BTHandler.setupAllert("BT NOT SUPPORTED FROM DEVICE",this );
             finish();
         }
         if (!bluetoothAdapter.isEnabled()) {
@@ -156,11 +132,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
     public void takeSocket(BluetoothSocket bluetoothSocket){
         System.out.println("SOCKET TAKED!");
+        adapter.clear();
+        this.textDiscoveredInfo.setVisibility(View.INVISIBLE);
         this.bluetoothSocket = bluetoothSocket;
         this.btnServer.setEnabled(true);
         this.btnClient.setEnabled(true);
         if(this.bluetoothSocket==null){
-            BTHandler.setupAllert("SOMETHING HAS GONE WRONG...NULL SOCKET...");
+            BTHandler.setupAllert("SOMETHING HAS GONE WRONG...NULL SOCKET...",this );
             return;   }
 
         try {
@@ -173,25 +151,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
           //  intent.putExtra("rspSocket", this.rspSocket);
 
              startActivity(intent);
-//        IntentFilter filterMSGSocket = new IntentFilter(IOForRSPGame.READY_BT_MSG);
-//        registerReceiver(mReceiver, filterMSGSocket);
-//        //register receiver for readed msgs on socket
-
-        /*this.listViewDiscovered.setVisibility(View.INVISIBLE);
-        this.textDiscoveredInfo.setVisibility(View.INVISIBLE);
-        this.debugTv.setVisibility(View.VISIBLE);
-        this.debugSendBtn.setVisibility(View.VISIBLE);      //make visible debugs for socket
-        this.debugSendBtn.setOnClickListener(new View.OnClickListener() {   //listener for send string btn debug socket
-            @Override
-            public void onClick(View v) {
-                try {
-                    rspSocket.sendMove("hello fucking BT word....");
-                } catch (Exception e) {
-                    BTHandler.setupAllert("ERROR IN O");
-                    e.printStackTrace();
-                }
-            }
-        });*/
     }
     private void connectTryServer() {
         // andrea!
@@ -202,22 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
-    private void getSocketServerSide(){
-        ServerGetConnection serverGetConnection=new ServerGetConnection(this);
-        BluetoothSocket serversSocket = null;
-        serverGetConnection.execute();
 
-        System.out.println(serversSocket);
-
-
-        /*try {
-            serverGetConnection.execute();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            BTHandler.setupAllert("ERROR IN PAIRING SERVER SIDE");
-        }*/
-
-    }
     //BROADCAST RECEIVER 4 CLIENT
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
@@ -230,25 +174,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(device.getName() != null) {
                     System.out.println(device.getName());
                     if(discovered.contains(device))
-                        return;                         //TODO DEBUG NOT ADD TWICE... LATE MSG??
+                        return;
                     adapter.add(device.getName());
                     discovered.add(device);
                 }
-                // debugTargetDevice=device;
-                //discovered.add(device);
-                //TODO ADD TO A LIST OF FOUNDED DEVICE (HAS TO BE CLEARED BEFORE START SCANNING!
-                //String deviceName = device.getName();
-                //String deviceHardwareAddress = device.getAddress(); // MAC address
-                // System.out.println(deviceName+deviceHardwareAddress);
             }
-            if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
+            else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
             {
-                //TODO HANLDE ?
                 pb.setVisibility(View.INVISIBLE);
-                //ArrayAdapter<BluetoothDevice> arrayAdapter= new ArrayAdapter<BluetoothDevice>(context,R.id.textView,discovered);
-                //listViewDiscovered.setAdapter(arrayAdapter);
-                //System.out.print("...........................");
-
                 if(discovered.size() == 0) {
                     textDiscoveredInfo.append(" no device discovered");
 
@@ -257,7 +190,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
             }
+            else if (action.equals(BTHandler.actionErrorToast)){
+                String outputAllert=intent.getStringExtra(BTHandler.outputMSGKeyStr);
+                System.err.println("ALLERT"+outputAllert);
+                Toast toast = new Toast(MainActivity.this).makeText(MainActivity.this, outputAllert,3);
+                toast.setGravity(Gravity.CENTER,0 ,0);
+                toast.show();
+                final String error2Show=outputAllert;
 
+                new CountDownTimer(2000, 2000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        System.out.println("tik4");
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        throw new RuntimeException("ALLERT..."+error2Show);
+                    }
+                }.start();
+
+
+            }
 
         }
     };
@@ -268,46 +222,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void connectTryClient(){
-        //livio
-        //TODO THIS METHOD HAS TO WRAP CALLING TO ANOTHER CLASS WITCH WILL PERFORM ALL IN ANOTHER THREAD
        /* BluetoothDevice targetDevice=null;
-        //getting paierd devices...         TODO ONLY DEBUG
+        //getting paierd devices...
         System.out.println("PAIRED DEVICES...");
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        discovered.addAll(pairedDevices);   //TODO DEBUG ONLY
-        //debug take nokia6 from paireds Device.
-        String debugTargetMac="7C:46:85:29:58:15"; //C9:50:76:8D:90:FD //oth
-        Iterator<BluetoothDevice> iterator= pairedDevices.iterator();
-        while (iterator.hasNext()){
-            BluetoothDevice device= iterator.next();
-            if (device.getAddress().equals(debugTargetMac)){
-                //accoppiated device Nokia 6 founded => target 2 connect
-                this.debugTargetDevice=device;
-            }
-        }
-        /*TODO TEST
-        if (pairedDevices.size() > 0) {
-            // There are paired devices. Get the name and address of each paired device.
-            for (BluetoothDevice device : pairedDevices) {
-                String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
-                System.out.println("DEVICE"+deviceName+deviceHardwareAddress);
-            }
-        }
+
         */
 
         //DISCOVERING OTHER DEVICE...
         // Create a BroadcastReceiver for ACTION_FOUND.
 
 
-        IntentFilter filterFound = new IntentFilter(BluetoothDevice.ACTION_FOUND);  //TODO NERVER FOUND NOTHING ... :(
+        IntentFilter filterFound = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         IntentFilter filterDiscChanged = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mReceiver, filterFound);
         registerReceiver(mReceiver, filterDiscChanged);
 
-        //getting runtime permission to access course location
+        //getting runtime permission to access course location NEEDED FROM ANDROID IMPLEMENTATION
 
-        //listViewDiscovered.setVisibility(View.VISIBLE);
 
         adapter.clear();
         discovered.clear();
@@ -316,42 +248,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
                 MY_PERMISSIONS_REQUEST_ACCESS_COARSE_LOCATION);
 
-        doDiscovery();   //manualy handle bt discvoery in code!! async call
-
-        //System.out.println(discovered);
-        /* TODO LIVIO BIND DISCOVERED => LISTVIEW
-        ArrayAdapter<BluetoothDevice> arrayAdapter= new ArrayAdapter<BluetoothDevice>(this,R.id.discovered,discovered);
-        listViewDiscovered.setAdapter(arrayAdapter);
-        Intent intentBluetooth = new Intent();
-        intentBluetooth.setAction(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
-        //startActivityForResult(intentBluetooth,11);//TODO CHECK START SYS DISCOVERY ACTIVITY!
-        //unbinding receiver of broadcast bt discovery notify... TODO EVALUTATE DIFFERENT POSITION (LK ONDESTROY)
-        //unregisterReceiver(mReceiver); //TODO ADD
-        BluetoothSocket clientSocket = null;
-        */
-        //todo get socket
+        doDiscovery();
 
 
-
-        /* TODO original   call 2 IO BT
-        try {
-            clientSocket= this.debugTargetDevice.createInsecureRfcommSocketToServiceRecord(uuid);
-            clientSocket.connect(); //TODO BLOCKING UNTIL CLIENT AND SERVER HAVE PAIRED...
-            //IOEXEPTION FOR TIMEOUT---ERRORS
-        } catch (IOException e)
-        {
-            BTHandler.setupAllert("ERROR IN CREATE COMUNICATION CHANNEL CLIENT");
-            e.printStackTrace();
-        }
-        try {
-            clientSocket.getInputStream().read();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
     }
 
-    //al click prendo il dispositivo tramite il nome.
+    //at click I take device by name
     private AdapterView.OnItemClickListener discoverListener
             = new AdapterView.OnItemClickListener() {
 
@@ -367,35 +269,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
             System.out.println(targetDevice.getAddress() + "\n"+ targetDevice.getName());
-            ClientGetConnection clientGetConnection=new ClientGetConnection(targetDevice,MainActivity.this);   //todo right this???
-            clientGetConnection.execute(targetDevice);  //todo later fix redundant input..
+            ClientGetConnection clientGetConnection=new ClientGetConnection(targetDevice,MainActivity.this);
+            clientGetConnection.execute(targetDevice);
             BluetoothSocket clientSocket = null;
-            /*try {
-                clientSocket =  clientGetConnection.execute(targetDevice).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            System.out.print(clientSocket);
-            */
-            /*try {
-                clientSocket=clientGetConnection.execute(targetDevice);
-            } catch (InterruptedException e) {
-                BTHandler.setupAllert("ERROR IN PAIRING CLIENT SIDE");
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            */
-        /*
-            try {
-                takeSocket(targetDevice);
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }*/
+
         }
 
     };
@@ -408,12 +285,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         pb.setVisibility(View.VISIBLE);
         listViewDiscovered.setVisibility(View.VISIBLE);
-       /* if (bluetoothAdapter.isDiscovering()) {
-            bluetoothAdapter.cancelDiscovery();
-
-        }
-        */
-        // Request discover from BluetoothAdapter
         textDiscoveredInfo.setText("device discovered:");
         bluetoothAdapter.startDiscovery();
     }
@@ -422,21 +293,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //todo cases with result canceled... exit or retry?(other way to get this..??)
         switch (requestCode){
-            case REQUEST_ENABLE_BT: //TODO RELATION.. SAME CODE SENDED TO START ACTIVITY RETRIVED HERE
+            case REQUEST_ENABLE_BT:
                 //result from enabling BT..:D
                 if (resultCode== Activity.RESULT_OK){
                     System.out.println("BT ENABLED SUSSFULY");
                 }
                 else if(resultCode==Activity.RESULT_CANCELED){      //pressed no on enabling bt..
-                    BTHandler.setupAllert("ERROR IN ENABLING...:'((");
+                    BTHandler.setupAllert("ERROR IN ENABLING...:'((", this);
                 }
                 break;
             case (DURATION):{ //DOCS SAY RESULT OF BT DISCOVERABLE SWITCH USE THIS RET CODE...
                 //server calling
                 if(resultCode==RESULT_CANCELED){
-                    BTHandler.setupAllert("ERROR IN DISCOVERABILITY");
+                    BTHandler.setupAllert("ERROR IN DISCOVERABILITY",this );
                 }
                 else if (resultCode==DURATION){
                     System.out.println("OK DISCOVERABILITY SWITCH");
@@ -445,6 +315,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 }
             }
+
 
         }
 
